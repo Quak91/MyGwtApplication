@@ -5,7 +5,6 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
-
 import java.util.ArrayList;
 
 public class MyGwtApplication implements EntryPoint {
@@ -50,6 +49,7 @@ public class MyGwtApplication implements EntryPoint {
         RootPanel.get("slot2").add(label);*/
     }
 
+    //DialogBox do tworzenia nowego przedmiotu
     private static class NewItemDialogBox extends DialogBox {
         public NewItemDialogBox() {
             setText("Nowy przedmiot");
@@ -68,7 +68,7 @@ public class MyGwtApplication implements EntryPoint {
 
             HorizontalPanel hPanelItemName = new HorizontalPanel();
             hPanelItemName.setSpacing(15);
-            TextBox textBoxItemName = new TextBox();
+            final TextBox textBoxItemName = new TextBox();
             hPanelItemName.add(new Label("Nazwa przedmiotu:"));
             hPanelItemName.add(textBoxItemName);
 
@@ -76,12 +76,12 @@ public class MyGwtApplication implements EntryPoint {
             hPanelGrades.setSpacing(5);
             hPanelGrades.add(new Label("Oceny:"));
 
-            //lista textboxów z ocenami
-            final ArrayList<TextBox> gradesTxtBoxes = new ArrayList<TextBox>(10);
+            //lista intboxów z ocenami
+            final ArrayList<IntegerBox> gradesIntBoxes = new ArrayList<IntegerBox>(10);
             for (int i=0;i<10;i++) {
-                gradesTxtBoxes.add(new TextBox());
-                gradesTxtBoxes.get(i).setWidth("20");
-                hPanelGrades.add(gradesTxtBoxes.get(i));
+                gradesIntBoxes.add(new IntegerBox());
+                gradesIntBoxes.get(i).setWidth("20");
+                hPanelGrades.add(gradesIntBoxes.get(i));
             }
 
             HorizontalPanel hPanelButtons = new HorizontalPanel();
@@ -104,9 +104,33 @@ public class MyGwtApplication implements EntryPoint {
             btnOk.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    //TODO sprawdzić czy przedmiot o takiej nazwie już istnieje
-                    //TODO walidacja textboxów z ocenami
-                    //TODO wysłać na serwer
+                    Subject subject;
+                    boolean isValid = true;
+                    if(textBoxItemName.getValue() != "") {
+                        //TODO sprawdzić czy przedmiot o takiej nazwie już istnieje
+                        ArrayList<Integer> grades = new ArrayList<Integer>(10);
+                        try {
+                            for (int i = 0; i < 10; i++) {
+                                grades.add(i, gradesIntBoxes.get(i).getValueOrThrow());
+                                Integer grade = gradesIntBoxes.get(i).getValue();
+                                if(grade != null && (grade < 1 || grade > 6)) { // walidacja ocen (skala 1-6)
+                                    isValid = false;
+                                }
+                            }
+                            subject = new Subject(textBoxItemName.getValue(), grades);
+                        } catch (Exception e) {
+                            isValid = false;
+                        }
+                        if(!isValid) {
+                            // błąd - nieprawidłowe oceny
+                            NewItemDialogBox.this.setText("Błąd! Nieprawidłowe oceny!");
+                        } else {
+                            //TODO wysłać na serwer
+                        }
+                    } else {
+                        // błąd - brak nazwy przedmiotu
+                        NewItemDialogBox.this.setText("Błąd! Brak nazwy przedmiotu!");
+                    }
                 }
             });
 
