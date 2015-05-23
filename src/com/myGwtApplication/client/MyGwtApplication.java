@@ -1,16 +1,20 @@
 package com.myGwtApplication.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+
+import java.text.ParseException;
 import java.util.ArrayList;
 
 public class MyGwtApplication implements EntryPoint {
 
     private FlexTable flexTable;
     private Button btnCreate;
+    private ServiceAsync service = GWT.create(Service.class);
 
     public void onModuleLoad() {
 
@@ -21,7 +25,7 @@ public class MyGwtApplication implements EntryPoint {
         for(int i=1;i<=10;i++)
             flexTable.setText(0, i, i+"");
         flexTable.setText(0,11, "Edytuj");
-        flexTable.setText(0,12, "Usuń");
+        flexTable.setText(0, 12, "Usuń");
 
         RootPanel.get("placeholder").add(flexTable);
         RootPanel.get("placeholder").add(btnCreate);
@@ -32,25 +36,10 @@ public class MyGwtApplication implements EntryPoint {
                 new NewItemDialogBox().center();
             }
         });
-
-        /*
-        final Button button = new Button("Click me");
-        final Label label = new Label();
-        button.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                if (label.getText().equals("")) {
-                    MyGwtApplicationService.App.getInstance().getMessage("Hello, World!", new MyAsyncCallback(label));
-                } else {
-                    label.setText("");
-                }
-            }
-        });
-        RootPanel.get("slot1").add(button);
-        RootPanel.get("slot2").add(label);*/
     }
 
     //DialogBox do tworzenia nowego przedmiotu
-    private static class NewItemDialogBox extends DialogBox {
+    private class NewItemDialogBox extends DialogBox {
         public NewItemDialogBox() {
             setText("Nowy przedmiot");
             setAnimationEnabled(true);
@@ -104,32 +93,34 @@ public class MyGwtApplication implements EntryPoint {
             btnOk.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    Subject subject;
                     boolean isValid = true;
-                    if(textBoxItemName.getValue() != "") {
+                    if(textBoxItemName.getValue() == "") {
+                        NewItemDialogBox.this.setText("Błąd! Brak nazwy przedmiotu!");
+                    } else {
                         //TODO sprawdzić czy przedmiot o takiej nazwie już istnieje
-                        ArrayList<Integer> grades = new ArrayList<Integer>(10);
-                        try {
-                            for (int i = 0; i < 10; i++) {
-                                grades.add(i, gradesIntBoxes.get(i).getValueOrThrow());
-                                Integer grade = gradesIntBoxes.get(i).getValue();
-                                if(grade != null && (grade < 1 || grade > 6)) { // walidacja ocen (skala 1-6)
-                                    isValid = false;
+                        int[] grades = new int[10];
+                        for(int i=0; i<10; i++) {
+                            try {
+                                if(gradesIntBoxes.get(i).getValueOrThrow() != null) {
+                                    grades[i] = gradesIntBoxes.get(i).getValueOrThrow();
+                                    if(grades[i] < 1 || grades[i] > 6)
+                                        isValid = false;
                                 }
+                            } catch (ParseException e) {
+                                isValid = false;
                             }
-                            subject = new Subject(textBoxItemName.getValue(), grades);
-                        } catch (Exception e) {
-                            isValid = false;
                         }
                         if(!isValid) {
-                            // błąd - nieprawidłowe oceny
                             NewItemDialogBox.this.setText("Błąd! Nieprawidłowe oceny!");
                         } else {
-                            //TODO wysłać na serwer
+                            Subject subject = new Subject(textBoxItemName.getValue(), grades);
+                            hide();
+                            GWT.log("new subject created");
+                            //TODO wysłać nowy przedmiot na serwer
+
+                            //odbieranie wszystkich przedmiotów z serwera
+                            service.getAllSubjects(new AllSubjectsCallback(flexTable));
                         }
-                    } else {
-                        // błąd - brak nazwy przedmiotu
-                        NewItemDialogBox.this.setText("Błąd! Brak nazwy przedmiotu!");
                     }
                 }
             });
@@ -138,19 +129,30 @@ public class MyGwtApplication implements EntryPoint {
         }
     }
 
-    private static class MyAsyncCallback implements AsyncCallback<String> {
-        private Label label;
+    //odbieranie wszystkich przedmiotów z serwera
+    private static class AllSubjectsCallback implements  AsyncCallback<ArrayList<Subject>> {
+        private FlexTable flexTable;
 
-        public MyAsyncCallback(Label label) {
-            this.label = label;
+        AllSubjectsCallback(FlexTable flexTable) {
+            this.flexTable = flexTable;
         }
 
-        public void onSuccess(String result) {
-            label.getElement().setInnerHTML(result);
+        @Override
+        public void onSuccess(ArrayList<Subject> result) {
+            GWT.log("received subjects from server");
+            for(int i=0; i<result.size(); i++) {
+                flexTable.setText(i+1, 0, result.get(i).getName());
+                for(int j=0;j<10;j++) {
+                    if(result.get(i).getGrades()[j] != 0) {
+                        flexTable.setText(i + 1, j + 1, result.get(i).getGrades()[j] + "");
+                    }
+                }
+            }
         }
+        @Override
+        public void onFailure(Throwable caught) {
 
-        public void onFailure(Throwable throwable) {
-            label.setText("Failed to receive answer from server!");
         }
     }
+
 }

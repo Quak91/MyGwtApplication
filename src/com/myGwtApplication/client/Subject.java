@@ -1,14 +1,17 @@
 package com.myGwtApplication.client;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Subject {
+public class Subject implements Serializable{
     private String name;
-    private ArrayList<Integer> grades;
+    private int[] grades;
 
-    public Subject(String name, ArrayList<Integer> grades) {
+    public Subject(String name, int[] grades) {
         this.name = name;
         this.grades = grades;
+    }
+
+    public Subject() {
     }
 
     public String getName() {
@@ -19,11 +22,11 @@ public class Subject {
         this.name = name;
     }
 
-    public ArrayList<Integer> getGrades() {
+    public int[] getGrades() {
         return grades;
     }
 
-    public void setGrades(ArrayList<Integer> grades) {
+    public void setGrades(int[] grades) {
         this.grades = grades;
     }
 }

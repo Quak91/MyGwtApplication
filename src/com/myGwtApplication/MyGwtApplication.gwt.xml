@@ -12,6 +12,6 @@
 
 
     <!-- Specify the app servlets.                   -->
-    <servlet path='/MyGwtApplicationService' class='com.myGwtApplication.server.MyGwtApplicationServiceImpl'/>
+    <servlet path='/MyGwtApplicationService' class='com.myGwtApplication.server.ServiceImpl'/>
 
 </module>

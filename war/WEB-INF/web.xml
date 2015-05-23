@@ -7,7 +7,7 @@
 
     <servlet>
         <servlet-name>com.myGwtApplication.MyGwtApplication MyGwtApplicationService</servlet-name>
-        <servlet-class>com.myGwtApplication.server.MyGwtApplicationServiceImpl</servlet-class>
+        <servlet-class>com.myGwtApplication.server.ServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>com.myGwtApplication.MyGwtApplication MyGwtApplicationService</servlet-name>
