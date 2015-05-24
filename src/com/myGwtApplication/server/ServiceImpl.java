@@ -39,4 +39,10 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
         subjects.remove(index);
         return index;
     }
+
+    @Override
+    public void updateSubject(int index, Subject subject) {
+        subjects.get(index).setName(subject.getName());
+        subjects.get(index).setGrades(subject.getGrades());
+    }
 }

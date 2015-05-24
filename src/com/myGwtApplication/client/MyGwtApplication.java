@@ -131,7 +131,7 @@ public class MyGwtApplication implements EntryPoint {
 
     //DialogBox do edytowania przedmiotu
     private class EditSubjectDialogBox extends DialogBox {
-        public EditSubjectDialogBox(final int rowIndex, final Subject subject) {
+        public EditSubjectDialogBox(final int rowIndex, Subject subject) {
             setText("Edytuj przedmiot");
             setAnimationEnabled(true);
             setGlassEnabled(true);
@@ -184,11 +184,35 @@ public class MyGwtApplication implements EntryPoint {
                 }
             });
 
+            // walidacja i update rekordu na serwerze
             btnOk.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    //TODO walidacja + edycja po stronie serwera
-                    hide();
+                    boolean isValid = true;
+                    if(textBoxItemName.getValue() == "") {
+                        Window.alert("Błąd! Brak nazwy przedmiotu!");
+                    } else {
+                        int[] grades = new int[10];
+                        for(int i=0; i<10; i++) {
+                            try {
+                                if(gradesIntBoxes.get(i).getValueOrThrow() != null) {
+                                    grades[i] = gradesIntBoxes.get(i).getValueOrThrow();
+                                    if(grades[i] < 1 || grades[i] > 6)
+                                        isValid = false;
+                                }
+                            } catch (ParseException e) {
+                                isValid = false;
+                            }
+                        }
+                        if(!isValid) {
+                            Window.alert("Błąd! Nieprawidłowe oceny!");
+                        } else {
+                            hide();
+                            Subject subject = new Subject(textBoxItemName.getValue(), grades);
+                            //update rekordu na serwerze
+                            service.updateSubject(rowIndex, subject, new UpdateSubjectCallback());
+                        }
+                    }
                 }
             });
 
@@ -207,6 +231,8 @@ public class MyGwtApplication implements EntryPoint {
                 for(int j=0;j<10;j++) {
                     if(result.get(i).getGrades()[j] != 0) {
                         flexTable.setText(i + 1, j + 1, result.get(i).getGrades()[j] + "");
+                    } else {
+                        flexTable.setText(i + 1, j + 1, "");
                     }
                     // usuwanie rekordu
                     flexTable.setWidget(i+1, 12, new Button("Usuń", new ClickHandler() {
@@ -276,6 +302,21 @@ public class MyGwtApplication implements EntryPoint {
             //po usunięciu z bazy usuwam z flextable
             GWT.log("LOG: deleted index: "+index);
             flexTable.removeRow(index + 1);
+        }
+    }
+
+    //edytowanie rekordu
+    private class UpdateSubjectCallback implements AsyncCallback<Void> {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+            // po zmianie rekordu na serwerze pobieram całą tabelę
+            GWT.log("LOG: Subject updated");
+            service.getAllSubjects(new GetAllSubjectsCallback());
         }
     }
 }
