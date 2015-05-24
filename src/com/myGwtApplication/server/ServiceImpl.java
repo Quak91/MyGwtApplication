@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class ServiceImpl extends RemoteServiceServlet implements Service {
 
-    ArrayList<Subject> subjects;
+    private ArrayList<Subject> subjects;
 
     public ServiceImpl() {
         super();
@@ -21,5 +21,10 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     @Override
     public ArrayList<Subject> getAllSubjects() {
         return subjects;
+    }
+
+    @Override
+    public void addSubject(Subject subject) {
+        subjects.add(subject);
     }
 }

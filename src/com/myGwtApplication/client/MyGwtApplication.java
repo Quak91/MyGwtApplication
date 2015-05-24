@@ -116,10 +116,8 @@ public class MyGwtApplication implements EntryPoint {
                             Subject subject = new Subject(textBoxItemName.getValue(), grades);
                             hide();
                             GWT.log("new subject created");
-                            //TODO wysłać nowy przedmiot na serwer
-
-                            //odbieranie wszystkich przedmiotów z serwera
-                            service.getAllSubjects(new AllSubjectsCallback(flexTable));
+                            //wysyłanie nowego rekordu na serwer
+                            service.addSubject(subject, new AddSubjectCallback());
                         }
                     }
                 }
@@ -129,13 +127,8 @@ public class MyGwtApplication implements EntryPoint {
         }
     }
 
-    //odbieranie wszystkich przedmiotów z serwera
-    private static class AllSubjectsCallback implements  AsyncCallback<ArrayList<Subject>> {
-        private FlexTable flexTable;
-
-        AllSubjectsCallback(FlexTable flexTable) {
-            this.flexTable = flexTable;
-        }
+    //odbieranie wszystkich rekordów z serwera
+    private class GetAllSubjectsCallback implements  AsyncCallback<ArrayList<Subject>> {
 
         @Override
         public void onSuccess(ArrayList<Subject> result) {
@@ -155,4 +148,19 @@ public class MyGwtApplication implements EntryPoint {
         }
     }
 
+    //wysyłanie nowego rekordu na serwer
+    private class AddSubjectCallback implements AsyncCallback<Void> {
+
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+            //po dodaniu rekordu do bazy pobieram całą tabelę z serwera
+            GWT.log("new subject added to database");
+            service.getAllSubjects(new GetAllSubjectsCallback());
+        }
+    }
 }
