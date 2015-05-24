@@ -10,4 +10,5 @@ public interface Service extends RemoteService {
 
     ArrayList<Subject> getAllSubjects();
     Integer addSubject(Subject subject);
+    Integer removeSubject(int index);
 }

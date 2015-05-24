@@ -141,6 +141,14 @@ public class MyGwtApplication implements EntryPoint {
                     if(result.get(i).getGrades()[j] != 0) {
                         flexTable.setText(i + 1, j + 1, result.get(i).getGrades()[j] + "");
                     }
+                    flexTable.setWidget(i+1, 12, new Button("x", new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            // usuwanie rekordu
+                            int rowIndex = flexTable.getCellForEvent(event).getRowIndex() - 1;
+                            service.removeSubject(rowIndex, new RemoveSubjectCallback());
+                        }
+                    }));
                 }
             }
         }
@@ -170,6 +178,22 @@ public class MyGwtApplication implements EntryPoint {
                 Window.alert("Błąd! Przedmiot o takiej nazwie już istnieje!");
                 GWT.log("LOG: subject already exists!");
             }
+        }
+    }
+
+    //usuwnie rekordu z bazy
+    private class RemoveSubjectCallback implements AsyncCallback<Integer> {
+
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Integer index) {
+            //po usunięciu z bazy usuwam z flextable
+            GWT.log("LOG: deleted index: "+index);
+            flexTable.removeRow(index + 1);
         }
     }
 }

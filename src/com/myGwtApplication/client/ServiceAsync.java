@@ -7,4 +7,5 @@ public interface ServiceAsync {
 
     void getAllSubjects(AsyncCallback<ArrayList<Subject>> async);
     void addSubject(Subject subject, AsyncCallback<Integer> async);
+    void removeSubject(int index, AsyncCallback<Integer> async);
 }
