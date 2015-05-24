@@ -6,5 +6,5 @@ import java.util.ArrayList;
 public interface ServiceAsync {
 
     void getAllSubjects(AsyncCallback<ArrayList<Subject>> async);
-    void addSubject(Subject subject, AsyncCallback<Void> async);
+    void addSubject(Subject subject, AsyncCallback<Integer> async);
 }

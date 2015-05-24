@@ -24,7 +24,13 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     }
 
     @Override
-    public void addSubject(Subject subject) {
+    public Integer addSubject(Subject subject) {
+        for(int i=0; i<subjects.size(); i++) {
+            if(subjects.get(i).getName().equals(subject.getName())) {
+                return 1; //przedmiot o takiej nazwie już istnieje
+            }
+        }
         subjects.add(subject);
+        return 0;
     }
 }

@@ -100,7 +100,6 @@ public class MyGwtApplication implements EntryPoint {
                     if(textBoxItemName.getValue() == "") {
                         Window.alert("Błąd! Brak nazwy przedmiotu!");
                     } else {
-                        //TODO sprawdzić czy przedmiot o takiej nazwie już istnieje
                         int[] grades = new int[10];
                         for(int i=0; i<10; i++) {
                             try {
@@ -119,7 +118,7 @@ public class MyGwtApplication implements EntryPoint {
                             Subject subject = new Subject(textBoxItemName.getValue(), grades);
                             hide();
                             GWT.log("LOG: new subject created");
-                            //wysyłanie nowego rekordu na serwer
+                            //próba wysłania nowego przedmiotu na serwer
                             service.addSubject(subject, new AddSubjectCallback());
                         }
                     }
@@ -152,7 +151,7 @@ public class MyGwtApplication implements EntryPoint {
     }
 
     //wysyłanie nowego rekordu na serwer
-    private class AddSubjectCallback implements AsyncCallback<Void> {
+    private class AddSubjectCallback implements AsyncCallback<Integer> {
 
         @Override
         public void onFailure(Throwable caught) {
@@ -160,10 +159,17 @@ public class MyGwtApplication implements EntryPoint {
         }
 
         @Override
-        public void onSuccess(Void result) {
-            //po dodaniu rekordu do bazy pobieram całą tabelę z serwera
-            GWT.log("LOG: new subject added to database");
-            service.getAllSubjects(new GetAllSubjectsCallback());
+        public void onSuccess(Integer result) {
+            //result 0 <- OK
+            //result 1 <- przedmiot o takiej nazwie już istnieje
+            if(result == 0) {
+                GWT.log("LOG: new subject added to database");
+                //po dodaniu rekordu do bazy pobieram całą tabelę z serwera
+                service.getAllSubjects(new GetAllSubjectsCallback());
+            } else {
+                Window.alert("Błąd! Przedmiot o takiej nazwie już istnieje!");
+                GWT.log("LOG: subject already exists!");
+            }
         }
     }
 }

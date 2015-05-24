@@ -9,5 +9,5 @@ import java.util.ArrayList;
 public interface Service extends RemoteService {
 
     ArrayList<Subject> getAllSubjects();
-    void addSubject(Subject subject);
+    Integer addSubject(Subject subject);
 }
