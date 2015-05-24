@@ -129,6 +129,73 @@ public class MyGwtApplication implements EntryPoint {
         }
     }
 
+    //DialogBox do edytowania przedmiotu
+    private class EditSubjectDialogBox extends DialogBox {
+        public EditSubjectDialogBox(final int rowIndex, final Subject subject) {
+            setText("Edytuj przedmiot");
+            setAnimationEnabled(true);
+            setGlassEnabled(true);
+
+            Button btnOk = new Button("OK");
+            Button btnCancel = new Button("Anuluj");
+            btnOk.setWidth("70");
+            btnCancel.setWidth("70");
+
+            VerticalPanel vPanel = new VerticalPanel();
+            vPanel.setWidth("400");
+            vPanel.setSpacing(15);
+            vPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
+            HorizontalPanel hPanelItemName = new HorizontalPanel();
+            hPanelItemName.setSpacing(15);
+            final TextBox textBoxItemName = new TextBox();
+            textBoxItemName.setValue(subject.getName());
+            hPanelItemName.add(new Label("Nazwa przedmiotu:"));
+            hPanelItemName.add(textBoxItemName);
+
+            HorizontalPanel hPanelGrades = new HorizontalPanel();
+            hPanelGrades.setSpacing(5);
+            hPanelGrades.add(new Label("Oceny:"));
+
+            //lista intboxów z ocenami
+            final ArrayList<IntegerBox> gradesIntBoxes = new ArrayList<IntegerBox>(10);
+            for (int i=0;i<10;i++) {
+                gradesIntBoxes.add(new IntegerBox());
+                gradesIntBoxes.get(i).setWidth("20");
+                hPanelGrades.add(gradesIntBoxes.get(i));
+                if(subject.getGrades()[i] != 0) {
+                    gradesIntBoxes.get(i).setValue(subject.getGrades()[i]);
+                }
+            }
+
+            HorizontalPanel hPanelButtons = new HorizontalPanel();
+            hPanelButtons.setSpacing(15);
+            hPanelButtons.add(btnOk);
+            hPanelButtons.add(btnCancel);
+
+            vPanel.add(hPanelItemName);
+            vPanel.add(hPanelGrades);
+            vPanel.add(hPanelButtons);
+
+            btnCancel.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    hide();
+                }
+            });
+
+            btnOk.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    //TODO walidacja + edycja po stronie serwera
+                    hide();
+                }
+            });
+
+            setWidget(vPanel);
+        }
+    }
+
     //odbieranie wszystkich rekordów z serwera
     private class GetAllSubjectsCallback implements  AsyncCallback<ArrayList<Subject>> {
 
@@ -141,12 +208,27 @@ public class MyGwtApplication implements EntryPoint {
                     if(result.get(i).getGrades()[j] != 0) {
                         flexTable.setText(i + 1, j + 1, result.get(i).getGrades()[j] + "");
                     }
-                    flexTable.setWidget(i+1, 12, new Button("x", new ClickHandler() {
+                    // usuwanie rekordu
+                    flexTable.setWidget(i+1, 12, new Button("Usuń", new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
-                            // usuwanie rekordu
                             int rowIndex = flexTable.getCellForEvent(event).getRowIndex() - 1;
                             service.removeSubject(rowIndex, new RemoveSubjectCallback());
+                        }
+                    }));
+                    // edytowanie rekordu
+                    flexTable.setWidget(i+1, 11, new Button("Edytuj", new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            int rowIndex = flexTable.getCellForEvent(event).getRowIndex();
+                            String subjectName = flexTable.getText(rowIndex, 0);
+                            int[] grades = new int[10];
+                            for (int i=0; i<10; i++) {
+                                if(flexTable.getText(rowIndex, i+1) != "") {
+                                    grades[i] = Integer.parseInt(flexTable.getText(rowIndex, i+1));
+                                }
+                            }
+                            new EditSubjectDialogBox(rowIndex - 1, new Subject(subjectName, grades)).center();
                         }
                     }));
                 }
