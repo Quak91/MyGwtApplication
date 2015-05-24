@@ -2,6 +2,7 @@ package com.myGwtApplication.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -33,14 +34,16 @@ public class MyGwtApplication implements EntryPoint {
         btnCreate.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new NewItemDialogBox().center();
+                new CreateNewSubjectDialogBox().center();
             }
         });
+
+        service.getAllSubjects(new GetAllSubjectsCallback());
     }
 
     //DialogBox do tworzenia nowego przedmiotu
-    private class NewItemDialogBox extends DialogBox {
-        public NewItemDialogBox() {
+    private class CreateNewSubjectDialogBox extends DialogBox {
+        public CreateNewSubjectDialogBox() {
             setText("Nowy przedmiot");
             setAnimationEnabled(true);
             setGlassEnabled(true);
@@ -85,7 +88,7 @@ public class MyGwtApplication implements EntryPoint {
             btnCancel.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    NewItemDialogBox.this.hide();
+                    CreateNewSubjectDialogBox.this.hide();
                 }
             });
 
@@ -95,7 +98,7 @@ public class MyGwtApplication implements EntryPoint {
                 public void onClick(ClickEvent event) {
                     boolean isValid = true;
                     if(textBoxItemName.getValue() == "") {
-                        NewItemDialogBox.this.setText("Błąd! Brak nazwy przedmiotu!");
+                        Window.alert("Błąd! Brak nazwy przedmiotu!");
                     } else {
                         //TODO sprawdzić czy przedmiot o takiej nazwie już istnieje
                         int[] grades = new int[10];
@@ -111,11 +114,11 @@ public class MyGwtApplication implements EntryPoint {
                             }
                         }
                         if(!isValid) {
-                            NewItemDialogBox.this.setText("Błąd! Nieprawidłowe oceny!");
+                            Window.alert("Błąd! Nieprawidłowe oceny!");
                         } else {
                             Subject subject = new Subject(textBoxItemName.getValue(), grades);
                             hide();
-                            GWT.log("new subject created");
+                            GWT.log("LOG: new subject created");
                             //wysyłanie nowego rekordu na serwer
                             service.addSubject(subject, new AddSubjectCallback());
                         }
@@ -123,7 +126,7 @@ public class MyGwtApplication implements EntryPoint {
                 }
             });
 
-            NewItemDialogBox.this.setWidget(vPanel);
+            CreateNewSubjectDialogBox.this.setWidget(vPanel);
         }
     }
 
@@ -132,7 +135,7 @@ public class MyGwtApplication implements EntryPoint {
 
         @Override
         public void onSuccess(ArrayList<Subject> result) {
-            GWT.log("received subjects from server");
+            GWT.log("LOG: received all subjects from server");
             for(int i=0; i<result.size(); i++) {
                 flexTable.setText(i+1, 0, result.get(i).getName());
                 for(int j=0;j<10;j++) {
@@ -159,7 +162,7 @@ public class MyGwtApplication implements EntryPoint {
         @Override
         public void onSuccess(Void result) {
             //po dodaniu rekordu do bazy pobieram całą tabelę z serwera
-            GWT.log("new subject added to database");
+            GWT.log("LOG: new subject added to database");
             service.getAllSubjects(new GetAllSubjectsCallback());
         }
     }
