@@ -1,9 +1,30 @@
 h1 {
-    font-size: 2em;
     font-weight: bold;
     text-align: center;
+    font-size: 3em;
 }
 
 body, td, a, div, .p {
     font-family: arial, sans-serif
+}
+
+body {
+    padding: 30px;
+}
+
+.flextableHeader {
+    background-color: gray;
+    color: white;
+    font-weight: bold;
+}
+
+.flextable {
+    border: 1px solid black;
+    padding: 3px;
+    margin-bottom: 10px;
+}
+
+.flexCell {
+    font-size: 1.3em;
+    padding: 5px;
 }

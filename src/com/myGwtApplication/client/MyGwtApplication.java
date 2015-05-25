@@ -28,6 +28,9 @@ public class MyGwtApplication implements EntryPoint {
         flexTable.setText(0,11, "Edytuj");
         flexTable.setText(0, 12, "Usuń");
 
+        flexTable.getRowFormatter().addStyleName(0, "flextableHeader");
+        flexTable.addStyleName("flextable");
+
         RootPanel.get("placeholder").add(flexTable);
         RootPanel.get("placeholder").add(btnCreate);
 
@@ -257,6 +260,12 @@ public class MyGwtApplication implements EntryPoint {
                             new EditSubjectDialogBox(rowIndex - 1, new Subject(subjectName, grades)).center();
                         }
                     }));
+                }
+            }
+            // formatowanie komórek
+            for(int i=0; i<result.size()+1; i++) {
+                for(int j=0; j<13; j++) {
+                    flexTable.getCellFormatter().setStyleName(i, j, "flexCell");
                 }
             }
         }
