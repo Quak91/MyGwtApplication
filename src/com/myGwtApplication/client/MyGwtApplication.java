@@ -238,15 +238,17 @@ public class MyGwtApplication implements EntryPoint {
                         flexTable.setText(i + 1, j + 1, "");
                     }
                     // usuwanie rekordu
-                    flexTable.setWidget(i+1, 12, new Button("Usuń", new ClickHandler() {
+                    Button btnRemove = new Button("Usuń", new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
                             int rowIndex = flexTable.getCellForEvent(event).getRowIndex() - 1;
                             service.removeSubject(rowIndex, new RemoveSubjectCallback());
                         }
-                    }));
+                    });
+                    btnRemove.setWidth("60");
+                    flexTable.setWidget(i + 1, 12, btnRemove);
                     // edytowanie rekordu
-                    flexTable.setWidget(i+1, 11, new Button("Edytuj", new ClickHandler() {
+                    Button btnEdit = new Button("Edytuj", new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
                             int rowIndex = flexTable.getCellForEvent(event).getRowIndex();
@@ -259,7 +261,9 @@ public class MyGwtApplication implements EntryPoint {
                             }
                             new EditSubjectDialogBox(rowIndex - 1, new Subject(subjectName, grades)).center();
                         }
-                    }));
+                    });
+                    btnEdit.setWidth("60");
+                    flexTable.setWidget(i+1, 11, btnEdit);
                 }
             }
             // formatowanie komórek
